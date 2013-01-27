@@ -44,7 +44,13 @@ sub printIt {
         my $imp = $que->{data}->{$que_id}->{importance};
         my $exp = $que->{data}->{$que_id}->{explanation};
         my $pub = $que->{data}->{$que_id}->{isPublic};
-        say "$text ($importance[$imp])";
+        my $visability;
+        if ($pub) {
+            $visability = "publicly";
+        } else {
+            $visability = "privately";
+        }
+        say "$text ($imp: $importance[$imp], $visability answered)";
         for my $ans_id ( sort { $a <=> $b } keys $que->{data}->{$que_id}->{answers} ) {
             my $ans_text  = $que->{data}->{$que_id}->{answers}->{$ans_id}->{text};
             my $my_ans    = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMine};
@@ -64,7 +70,7 @@ sub printIt {
 
 print "Do you want to search for a question? ";
 my $user_answer = <STDIN>;
-if ($user_answer =~ /\A(?:yes|ja)/xmsi) {
+if ($user_answer =~ /\A(?:y|j)/xmsi) {
     ## Building a query hash
     my %qQue;
     for my $que_id ( keys $que->{data} ) {
@@ -91,7 +97,7 @@ if ($user_answer =~ /\A(?:yes|ja)/xmsi) {
         if ( @matches > 20 ) {
             print "Do you really print all questions? ";
             my $user_answer = <STDIN>;
-            next unless ($user_answer =~ /\A(?:yes|ja)/xmsi);
+            next unless ($user_answer =~ /\A(?:y|j)/xmsi);
         }
         for my $que_id ( sort { $a <=> $b } @que_id ) {
             printIt $que_id, $pattern;
