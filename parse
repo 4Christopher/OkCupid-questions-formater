@@ -68,7 +68,7 @@ sub printIt {
 } ## end sub printIt
 
 
-print "Do you want to search for a question? ";
+print "Do you want to search for a question (if no you will see all questions …)? ";
 my $user_answer = <STDIN>;
 if ($user_answer =~ /\A(?:y|j)/xmsi) {
     ## Building a query hash
@@ -95,7 +95,7 @@ if ($user_answer =~ /\A(?:y|j)/xmsi) {
         my @que_id = map { $qQue{$_} } @matches;
 	say "Matched " . @matches . " time(s):";
         if ( @matches > 20 ) {
-            print "Do you really print all questions? ";
+            print "Do you really want to print all questions? ";
             my $user_answer = <STDIN>;
             next unless ($user_answer =~ /\A(?:y|j)/xmsi);
         }
