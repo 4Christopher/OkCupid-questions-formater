@@ -13,11 +13,11 @@ my $file = "../data/questions.json";
 
 #<<<
 my @importance = (
-    "Irrelevant",
-    "A little important",
-    "Somewhat important",
-    "Very important",
-    "Mandatory"
+    'Irrelevant',
+    colored('A little important', 'green'),
+    colored('Somewhat important', 'underline green'),
+    colored('Very important', 'red on_bright_yellow'),
+    colored('Mandatory', 'bright_red on_black'),
 );
 #>>>
 
