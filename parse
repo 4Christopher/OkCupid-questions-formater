@@ -1,0 +1,59 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use autodie;
+use feature qw(say);
+use utf8;
+binmode STDOUT, ':encoding(UTF-8)';
+use JSON::DWIW;
+use Term::ANSIColor;
+## cpan JSON::DWIW Term::ANSIColor
+
+my $file = "../data/questions.json";
+
+#<<<
+my @importance = (
+    "Irrelevant",
+    "A little important",
+    "Somewhat important",
+    "Very important",
+    "Mandatory"
+);
+#>>>
+
+my $json_parser = JSON::DWIW->new;
+my $que         = $json_parser->from_json_file($file);
+my $date        = $que->{date};
+print "The data is from $date\n\n";
+
+sub printIt {
+    my $que_id = shift;
+    if ( $que->{data}->{$que_id}->{isSkipped} ) { ## The question is skipped
+        say "$que_id was skipped";
+    }
+    else {
+        chomp( my $text = $que->{data}->{$que_id}->{text} );
+        ## There are sometimes newlines at the end …
+        my $imp = $que->{data}->{$que_id}->{importance};
+        my $exp = $que->{data}->{$que_id}->{explanation};
+        my $pub = $que->{data}->{$que_id}->{isPublic};
+        say "$text ($importance[$imp])";
+        for my $ans_id ( sort { $a <=> $b } keys $que->{data}->{$que_id}->{answers} ) {
+            my $ans_text  = $que->{data}->{$que_id}->{answers}->{$ans_id}->{text};
+            my $my_ans    = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMine};
+            my $match_ans = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMatch};
+            if ($my_ans) {
+                print color 'underline';
+            }
+            if ($match_ans) {
+                print color 'green';
+            }
+            say "\t$ans_text" . color 'reset';
+        }
+    } ## end else [ if ( $que->{data}->{$que_id...})]
+} ## end sub printIt
+
+for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
+    printIt $que_id;
+    last;
+}
