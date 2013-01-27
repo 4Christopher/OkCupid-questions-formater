@@ -28,12 +28,19 @@ print "The data is from $date\n\n";
 
 sub printIt {
     my $que_id = shift;
+    my $pattern = shift;
+
+    chomp( my $text = $que->{data}->{$que_id}->{text} );
+    if (defined $pattern) {
+        $text =~ /$pattern/ms;
+        $text = ${^PREMATCH} . colored( ${^MATCH}, 'blue') . ${^POSTMATCH};
+    }
+
+    ## There are sometimes newlines at the end …
     if ( $que->{data}->{$que_id}->{isSkipped} ) { ## The question is skipped
-        say "$que_id was skipped";
+        say "$que_id was skipped: $text";
     }
     else {
-        chomp( my $text = $que->{data}->{$que_id}->{text} );
-        ## There are sometimes newlines at the end …
         my $imp = $que->{data}->{$que_id}->{importance};
         my $exp = $que->{data}->{$que_id}->{explanation};
         my $pub = $que->{data}->{$que_id}->{isPublic};
@@ -51,9 +58,47 @@ sub printIt {
             say "\t$ans_text" . color 'reset';
         }
     } ## end else [ if ( $que->{data}->{$que_id...})]
+    print "\n";
 } ## end sub printIt
 
-for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
-    printIt $que_id;
-    last;
+
+print "Do you want to search for a question? ";
+my $user_answer = <STDIN>;
+if ($user_answer =~ /\A(?:yes|ja)/xmsi) {
+    ## Building a query hash
+    my %qQue;
+    for my $que_id ( keys $que->{data} ) {
+        chomp( my $text = $que->{data}->{$que_id}->{text} );
+        ## There are sometimes newlines at the end …
+        $qQue{$text} = $que_id;
+    }
+
+    say "You can use a perl regular expression to match against the questions.";
+    while (1) {
+	print "Please enter a pattern: ";
+	chomp(my $pattern = <STDIN>);
+	last if "$pattern" =~ /\A\s*\Z/;
+        
+	my @matches = eval { grep /$pattern/ms, keys %qQue };
+	if ($@) {
+		say "Your regular expresion failed";
+		print "Error: $@";
+		next;
+	}
+
+        my @que_id = map { $qQue{$_} } @matches;
+	say "Matched " . @matches . " time(s):";
+        if ( @matches > 20 ) {
+            print "Do you really print all questions? ";
+            my $user_answer = <STDIN>;
+            next unless ($user_answer =~ /\A(?:yes|ja)/xmsi);
+        }
+        for my $que_id ( sort { $a <=> $b } @que_id ) {
+            printIt $que_id, $pattern;
+        }
+    }
+} else {
+    for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
+        printIt $que_id;
+    }
 }
