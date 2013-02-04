@@ -27,13 +27,13 @@ my $date        = $que->{date};
 print "The data is from $date\n\n";
 
 sub printIt {
-    my $que_id = shift;
+    my $que_id  = shift;
     my $pattern = shift;
 
     chomp( my $text = $que->{data}->{$que_id}->{text} );
-    if (defined $pattern) {
+    if ( defined $pattern ) {
         $text =~ /$pattern/ms;
-        $text = ${^PREMATCH} . colored( ${^MATCH}, 'blue') . ${^POSTMATCH};
+        $text = ${^PREMATCH} . colored( ${^MATCH}, 'blue' ) . ${^POSTMATCH};
     }
 
     ## There are sometimes newlines at the end …
@@ -47,7 +47,8 @@ sub printIt {
         my $visability;
         if ($pub) {
             $visability = "publicly";
-        } else {
+        }
+        else {
             $visability = "privately";
         }
         say "$text ($imp: $importance[$imp], $visability answered)";
@@ -61,16 +62,19 @@ sub printIt {
             if ($match_ans) {
                 print color 'green';
             }
-            say "\t$ans_text" . color 'reset';
+            print "\t$ans_text" . color 'reset';
+            if ( $my_ans and $exp ) {
+                print " ($exp)";
+            }
+            print "\n";
         }
     } ## end else [ if ( $que->{data}->{$que_id...})]
     print "\n";
 } ## end sub printIt
 
-
 print "Do you want to search for a question (if no you will see all questions …)? ";
 my $user_answer = <STDIN>;
-if ($user_answer =~ /\A(?:y|j)/xmsi) {
+if ( $user_answer =~ /\A(?:y|j)/xmsi ) {
     ## Building a query hash
     my %qQue;
     for my $que_id ( keys $que->{data} ) {
@@ -80,30 +84,34 @@ if ($user_answer =~ /\A(?:y|j)/xmsi) {
     }
 
     say "You can use a perl regular expression to match against the questions.";
+    say "If you are done you can enter a empty pattern to exit the program.";
     while (1) {
-	print "Please enter a pattern: ";
-	chomp(my $pattern = <STDIN>);
-	last if "$pattern" =~ /\A\s*\Z/;
-        
-	my @matches = eval { grep /$pattern/ms, keys %qQue };
-	if ($@) {
-		say "Your regular expresion failed";
-		print "Error: $@";
-		next;
-	}
+        print "Please enter a pattern: ";
+        chomp( my $pattern = <STDIN> );
+        last if "$pattern" =~ /\A\s*\Z/;
+
+        my @matches = eval { grep /$pattern/ms, keys %qQue };
+        if ($@) {
+            say "Your regular expresion failed";
+            print "Error: $@";
+            next;
+        }
 
         my @que_id = map { $qQue{$_} } @matches;
-	say "Matched " . @matches . " time(s):";
+        my $word_times = "time";
+        $word_times .= "s" unless @matches == 1;
+        say "Matched " . @matches . " $word_times:";
         if ( @matches > 20 ) {
             print "Do you really want to print all questions? ";
             my $user_answer = <STDIN>;
-            next unless ($user_answer =~ /\A(?:y|j)/xmsi);
+            next unless ( $user_answer =~ /\A(?:y|j)/xmsi );
         }
         for my $que_id ( sort { $a <=> $b } @que_id ) {
             printIt $que_id, $pattern;
         }
-    }
-} else {
+    } ## end while (1)
+} ## end if ( $user_answer =~ /\A(?:y|j)/xmsi)
+else {
     for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
         printIt $que_id;
     }
