@@ -11,6 +11,9 @@ use Term::ANSIColor;
 
 my $file = '../data/questions.json';
 
+sub int_h { say "\nExiting. Have a nice day …"; exit 0 }
+$SIG{'INT'} = 'int_h';
+
 #<<<
 my @importance = (
     'Irrelevant',
@@ -73,9 +76,14 @@ sub printIt {
     print "\n";
 } ## end sub printIt
 
-print "Do you want to search for a question (if no you will see all questions …)? ";
+print 'Do you want to see all questions (default is no)? ';
 my $user_answer = <STDIN>;
-if ( $user_answer =~ /\A(?:y|j)/xmsi ) {
+if ( $user_answer =~ /\A(?:yes|ja)/xmsi ) {
+    for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
+        printIt $que_id;
+    }
+} ## end if ( $user_answer =~ /\A(?:y|j)/xmsi)
+else {
     ## Building a query hash
     my %qQue;
     for my $que_id ( keys $que->{data} ) {
@@ -85,16 +93,20 @@ if ( $user_answer =~ /\A(?:y|j)/xmsi ) {
     }
 
     say 'You can use a perl regular expression to match against the questions.';
+    say 'The regular expression is case insensitive.';
     say 'If you are done you can enter a empty pattern to exit the program.';
     while (1) {
         print 'Please enter a pattern: ';
         chomp( my $pattern = <STDIN> );
-        last if "$pattern" =~ /\A\s*\Z/xms;
+        if ("$pattern" =~ /\A\s*\Z/xms) {
+            say 'Have fun';
+            last;
+        }
 
         my @matches = eval { grep /$pattern/msi, keys %qQue };
         if ($@) {
             say 'Your regular expresion failed';
-            print 'Error: $@';
+            print "Error: $@";
             next;
         }
 
@@ -102,9 +114,9 @@ if ( $user_answer =~ /\A(?:y|j)/xmsi ) {
         my $word_times = 'time';
         my $match_count = @matches;
         $word_times .= "s" unless $match_count == 1;
-        say "Matched " . $match_count . " $word_times:";
+        say 'Matched ' . $match_count . " $word_times:";
         if ( $match_count > 20 ) {
-            print "Do you really want to print all questions? ";
+            print 'Do you really want to print all questions? ';
             my $user_answer = <STDIN>;
             next unless ( $user_answer =~ /\A(?:y|j)/xmsi );
         }
@@ -112,9 +124,4 @@ if ( $user_answer =~ /\A(?:y|j)/xmsi ) {
             printIt $que_id, $pattern;
         }
     } ## end while (1)
-} ## end if ( $user_answer =~ /\A(?:y|j)/xmsi)
-else {
-    for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
-        printIt $que_id;
-    }
 }

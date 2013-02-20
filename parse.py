@@ -1,12 +1,20 @@
 #!/usr/bin/python
 # vim: set fileencoding=utf-8
 
+import sys
+import signal
 import json
 import codecs
 from termcolor import colored
 import re
 
 file = '../data/questions.json'
+
+def signal_handler(signal, frame):
+    print('\nExiting. Have a nice day …')
+    sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+
 importance = [ 'Irrelevant',
 	colored('A little important', 'green'),
 	colored('Somewhat important', 'green', attrs=['underline']),
@@ -47,24 +55,32 @@ def printIt(que_id, pattern):
 			if my_ans:
 				color_attrs.append('underline')
 			if match_ans:
-				print(colored('\t%s' % (ans_text), 'green', attrs=color_attrs))
+				sys.stdout.write(colored('\t%s' % (ans_text), 'green', attrs=color_attrs))
 			else:
-				print(colored('\t%s' % (ans_text), attrs=color_attrs))
+				sys.stdout.write(colored('\t%s' % (ans_text), attrs=color_attrs))
 			if my_ans and exp:
-				print(" (%s)" % (exp))
+				sys.stdout.write(" (%s)" % (exp))
+			print('')
+	print('')
 
-useranswer = raw_input("Do you want to search for a question (if no you will see all questions …)? ")
-if re.match(r"(y|j)", useranswer, re.I):
+useranswer = raw_input('Do you want to see all questions (default is no)? ')
+if re.match(r"(yes|ja)", useranswer, re.I):
+	for id in sorted([int(id) for id in que['data']]):
+		printIt(str(id), None)
+else:
 	qQue = {}
 	for que_id in que['data']:
 		text = que['data'][que_id]['text']
 		qQue[text] = que_id
 	
 	print('You can use a python regular expression to match against the questions.')
+	print('The regular expression is case insensitive.')
 	print('If you are done you can enter a empty pattern to exit the program.')
 	while True:
 		pattern = raw_input('Please enter a pattern: ')
-		if re.match(r"\s*\Z", pattern): break
+		if re.match(r"\s*\Z", pattern):
+			print('Have fun')
+			break
 
 		try:
 			matches = [text for text in qQue if re.search(pattern, text, re.I)]
@@ -82,6 +98,3 @@ if re.match(r"(y|j)", useranswer, re.I):
 		que_id_l.sort(key=int)
 		for que_id in que_id_l:
 			printIt(que_id, pattern)
-else:
-	for id in sorted([int(id) for id in que['data']]):
-		printIt(str(id), None)
