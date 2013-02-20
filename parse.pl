@@ -9,7 +9,7 @@ use JSON::DWIW;
 use Term::ANSIColor;
 ## cpan JSON::DWIW Term::ANSIColor
 
-my $file = "../data/questions.json";
+my $file = '../data/questions.json';
 
 #<<<
 my @importance = (
@@ -31,12 +31,13 @@ sub printIt {
     my $pattern = shift;
 
     chomp( my $text = $que->{data}->{$que_id}->{text} );
+    ## There are sometimes newlines at the end …
+
     if ( defined $pattern ) {
         $text =~ /$pattern/ms;
         $text = ${^PREMATCH} . colored( ${^MATCH}, 'blue' ) . ${^POSTMATCH};
     }
 
-    ## There are sometimes newlines at the end …
     if ( $que->{data}->{$que_id}->{isSkipped} ) { ## The question is skipped
         say "$que_id was skipped: $text";
     }
@@ -51,7 +52,7 @@ sub printIt {
         else {
             $visability = "privately";
         }
-        say "$text ($imp: $importance[$imp], $visability answered)";
+        say "$text ($imp: $importance[$imp], $visability answered):";
         for my $ans_id ( sort { $a <=> $b } keys $que->{data}->{$que_id}->{answers} ) {
             my $ans_text  = $que->{data}->{$que_id}->{answers}->{$ans_id}->{text};
             my $my_ans    = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMine};
@@ -83,25 +84,26 @@ if ( $user_answer =~ /\A(?:y|j)/xmsi ) {
         $qQue{$text} = $que_id;
     }
 
-    say "You can use a perl regular expression to match against the questions.";
-    say "If you are done you can enter a empty pattern to exit the program.";
+    say 'You can use a perl regular expression to match against the questions.';
+    say 'If you are done you can enter a empty pattern to exit the program.';
     while (1) {
-        print "Please enter a pattern: ";
+        print 'Please enter a pattern: ';
         chomp( my $pattern = <STDIN> );
-        last if "$pattern" =~ /\A\s*\Z/;
+        last if "$pattern" =~ /\A\s*\Z/xms;
 
-        my @matches = eval { grep /$pattern/ms, keys %qQue };
+        my @matches = eval { grep /$pattern/msi, keys %qQue };
         if ($@) {
-            say "Your regular expresion failed";
-            print "Error: $@";
+            say 'Your regular expresion failed';
+            print 'Error: $@';
             next;
         }
 
         my @que_id = map { $qQue{$_} } @matches;
-        my $word_times = "time";
-        $word_times .= "s" unless @matches == 1;
-        say "Matched " . @matches . " $word_times:";
-        if ( @matches > 20 ) {
+        my $word_times = 'time';
+        my $match_count = @matches;
+        $word_times .= "s" unless $match_count == 1;
+        say "Matched " . $match_count . " $word_times:";
+        if ( $match_count > 20 ) {
             print "Do you really want to print all questions? ";
             my $user_answer = <STDIN>;
             next unless ( $user_answer =~ /\A(?:y|j)/xmsi );
