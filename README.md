@@ -7,7 +7,7 @@ I first wrote it in Perl and implemented it afterwards also in Python. Boat scri
 To use it you have to specify the filename in the perl script and afterwards run the script.
 You can also search for questions using regular expressions as known from perl.
 
-![Screen shot from the terminal](https://github.com/4Christopher/OKCupid-questions-formater/blob/master/screenshot.png)
+![Screen shot from the terminal](https://raw.github.com/4Christopher/OKCupid-questions-formater/master/screenshot.png)
 
 # License
 [GPL](http://www.gnu.org/licenses/gpl.html) version 3 or later
