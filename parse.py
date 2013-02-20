@@ -9,6 +9,8 @@ from termcolor import colored
 import re
 
 file = '../data/questions.json'
+if sys.argv[1]:
+	file = sys.argv[1]
 
 def signal_handler(signal, frame):
     print('\nExiting. Have a nice day …')
@@ -23,7 +25,11 @@ importance = [ 'Irrelevant',
 ]
 
 # json_data=open('test.json')
-json_data = codecs.open(file, 'r', 'utf-8')
+try:	json_data = codecs.open(file, 'r', 'utf-8')
+except IOError as detail:
+	print('File '+ file +' is not readable: '+ detail[1])
+	print('Please give me a JSON file as parameter …')
+	sys.exit(1)
 que = json.load(json_data)
 json_data.close()
 date = que['date']

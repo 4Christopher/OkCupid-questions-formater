@@ -10,6 +10,12 @@ use Term::ANSIColor;
 ## cpan JSON::DWIW Term::ANSIColor
 
 my $file = '../data/questions.json';
+$file = shift if @ARGV;
+unless (-r $file) {
+    say "File $file is not readable: $!";
+    say 'Please give me a JSON file as parameter …';
+    exit 1;
+}
 
 sub int_h { say "\nExiting. Have a nice day …"; exit 0 }
 $SIG{'INT'} = 'int_h';
