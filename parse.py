@@ -69,38 +69,34 @@ def printIt(que_id, pattern):
 			print('')
 	print('')
 
-useranswer = raw_input('Do you want to see all questions (default is no)? ')
-if re.match(r"(yes|ja)", useranswer, re.I):
-	for id in sorted([int(id) for id in que['data']]):
-		printIt(str(id), None)
-else:
-	qQue = {}
-	for que_id in que['data']:
-		text = que['data'][que_id]['text']
-		qQue[text] = que_id
-	
-	print('You can use a python regular expression to match against the questions.')
-	print('The regular expression is case insensitive.')
-	print('If you are done you can enter a empty pattern to exit the program.')
-	while True:
-		pattern = raw_input('Please enter a pattern: ')
-		if re.match(r"\s*\Z", pattern):
-			print('Have fun')
-			break
 
-		try:
-			matches = [text for text in qQue if re.search(pattern, text, re.I)]
-		except:
-			print('Your regular expresion failed')
+qQue = {}
+for que_id in que['data']:
+	text = que['data'][que_id]['text']
+	qQue[text] = que_id
+
+print('You can use a python regular expression to match against the questions.')
+print('The regular expression is case insensitive.')
+print('If you are done you can enter a empty pattern to exit the program.')
+while True:
+	pattern = raw_input('Please enter a pattern: ')
+	if re.match(r"\s*\Z", pattern):
+		print('Have fun')
+		break
+
+	try:
+		matches = [text for text in qQue if re.search(pattern, text, re.I)]
+	except:
+		print('Your regular expresion failed')
+		continue
+	que_id_l = [ qQue[text] for text in matches]
+	word_times = 'time'
+	match_count = len(que_id_l)
+	if match_count == 1: word_times += 's'
+	print('Matched %d %s:' % (match_count, word_times))
+	if match_count > 20:
+		if not re.match(r"(y|j)", raw_input("Do you really want to print all questions? "), re.I):
 			continue
-		que_id_l = [ qQue[text] for text in matches]
-		word_times = 'time'
-		match_count = len(que_id_l)
-		if match_count == 1: word_times += 's'
-		print('Matched %d %s:' % (match_count, word_times))
-		if match_count > 20:
-			if not re.match(r"(y|j)", raw_input("Do you really want to print all questions? "), re.I):
-				continue
-		que_id_l.sort(key=int)
-		for que_id in que_id_l:
-			printIt(que_id, pattern)
+	que_id_l.sort(key=int)
+	for que_id in que_id_l:
+		printIt(que_id, pattern)

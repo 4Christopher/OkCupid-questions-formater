@@ -90,51 +90,44 @@ sub printIt {
     print "\n";
 } ## end sub printIt
 
-print 'Do you want to see all questions (default is no)? ';
-if ( <> =~ /\A(?:yes|ja)/xmsi ) {
-    for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
-        printIt $que_id;
-    }
-} ## end if ( $user_answer =~ /\A(?:y|j)/xmsi)
-else { ## Building a query hash
-    my %qQue;
-    for my $que_id ( keys $que->{data} ) {
-        chomp( my $text = $que->{data}->{$que_id}->{text} );
-        ## There are sometimes newlines at the end …
-        $qQue{$text} = $que_id;
-    }
-
-    say 'You can use a perl regular expression to match against the questions.';
-    say 'The regular expression is case insensitive.';
-    say 'If you are done you can enter a empty pattern to exit the program.';
-    while (1) {
-        my $pattern = $cli->readline('Please enter a pattern: ');
-        if ("$pattern" =~ /\A\s*\Z/xms) {
-            say 'Have fun';
-            last;
-        }
-
-        my @matches = eval {
-            grep { /$pattern/msi } keys %qQue ## no critic (RegularExpressions::RequireExtendedFormatting)
-        };
-        if ($@) {
-            say 'Your regular expresion failed';
-            print "Error: $@";
-            next;
-        }
-
-        my @que_id = map { $qQue{$_} } @matches;
-        my $word_times = 'time';
-        my $match_count = @matches;
-        $word_times .= "s" unless $match_count == 1;
-        say 'Matched ' . $match_count . " $word_times:";
-        if ( $match_count > 20 ) {
-            print 'Do you really want to print all questions? ';
-            my $user_answer = <>;
-            next unless ( $user_answer =~ /\A(?:y|j)/xmsi );
-        }
-        for my $que_id ( sort { $a <=> $b } @que_id ) {
-            printIt $que_id, $pattern;
-        }
-    } ## end while (1)
+## Building a query hash
+my %qQue;
+for my $que_id ( keys $que->{data} ) {
+    chomp( my $text = $que->{data}->{$que_id}->{text} );
+    ## There are sometimes newlines at the end …
+    $qQue{$text} = $que_id;
 }
+
+say 'You can use a perl regular expression to match against the questions.';
+say 'The regular expression is case insensitive.';
+say 'If you are done you can enter a empty pattern to exit the program.';
+while (1) {
+    my $pattern = $cli->readline('Please enter a pattern: ');
+    if ("$pattern" =~ /\A\s*\Z/xms) {
+        say 'Have fun';
+        last;
+    }
+
+    my @matches = eval {
+        grep { /$pattern/msi } keys %qQue ## no critic (RegularExpressions::RequireExtendedFormatting)
+    };
+    if ($@) {
+        say 'Your regular expresion failed';
+        print "Error: $@";
+        next;
+    }
+
+    my @que_id = map { $qQue{$_} } @matches;
+    my $word_times = 'time';
+    my $match_count = @matches;
+    $word_times .= "s" unless $match_count == 1;
+    say 'Matched ' . $match_count . " $word_times:";
+    if ( $match_count > 20 ) {
+        print 'Do you really want to print all questions? ';
+        my $user_answer = <>;
+        next unless ( $user_answer =~ /\A(?:y|j)/xmsi );
+    }
+    for my $que_id ( sort { $a <=> $b } @que_id ) {
+        printIt $que_id, $pattern;
+    }
+} ## end while (1)
