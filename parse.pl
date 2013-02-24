@@ -7,7 +7,8 @@ use utf8;
 binmode STDOUT, ':encoding(UTF-8)';
 use JSON::DWIW;
 use Term::ANSIColor;
-## cpan JSON::DWIW Term::ANSIColor
+use Term::ReadLine;
+## cpan JSON::DWIW Term::ANSIColor Term::ReadLine
 
 my $file = '../data/questions.json';
 $file = shift if @ARGV;
@@ -17,8 +18,15 @@ unless (-r $file) {
     exit 1;
 }
 
+my $cli = Term::ReadLine->new;
+
+# if ($^O eq "MSWin32" || $^O eq "dos")
+# {
+#     open(my $INPUT, "<con") and $cli->newTTY($INPUT, $cli->OUT);
+# }
+
 sub int_h { say "\nExiting. Have a nice day …"; exit 0 }
-$SIG{'INT'} = 'int_h';
+local $SIG{'INT'} = 'int_h';
 
 #<<<
 my @importance = (
@@ -43,7 +51,7 @@ sub printIt {
     ## There are sometimes newlines at the end …
 
     if ( defined $pattern ) {
-        $text =~ /$pattern/ms;
+        $text =~ /$pattern/ms; ## no critic (RegularExpressions::RequireExtendedFormatting)
         $text = ${^PREMATCH} . colored( ${^MATCH}, 'blue' ) . ${^POSTMATCH};
     }
 
@@ -83,14 +91,12 @@ sub printIt {
 } ## end sub printIt
 
 print 'Do you want to see all questions (default is no)? ';
-my $user_answer = <STDIN>;
-if ( $user_answer =~ /\A(?:yes|ja)/xmsi ) {
+if ( <> =~ /\A(?:yes|ja)/xmsi ) {
     for my $que_id ( sort { $a <=> $b } keys $que->{data} ) {
         printIt $que_id;
     }
 } ## end if ( $user_answer =~ /\A(?:y|j)/xmsi)
-else {
-    ## Building a query hash
+else { ## Building a query hash
     my %qQue;
     for my $que_id ( keys $que->{data} ) {
         chomp( my $text = $que->{data}->{$que_id}->{text} );
@@ -102,14 +108,15 @@ else {
     say 'The regular expression is case insensitive.';
     say 'If you are done you can enter a empty pattern to exit the program.';
     while (1) {
-        print 'Please enter a pattern: ';
-        chomp( my $pattern = <STDIN> );
+        my $pattern = $cli->readline('Please enter a pattern: ');
         if ("$pattern" =~ /\A\s*\Z/xms) {
             say 'Have fun';
             last;
         }
 
-        my @matches = eval { grep /$pattern/msi, keys %qQue };
+        my @matches = eval {
+            grep { /$pattern/msi } keys %qQue ## no critic (RegularExpressions::RequireExtendedFormatting)
+        };
         if ($@) {
             say 'Your regular expresion failed';
             print "Error: $@";
@@ -123,7 +130,7 @@ else {
         say 'Matched ' . $match_count . " $word_times:";
         if ( $match_count > 20 ) {
             print 'Do you really want to print all questions? ';
-            my $user_answer = <STDIN>;
+            my $user_answer = <>;
             next unless ( $user_answer =~ /\A(?:y|j)/xmsi );
         }
         for my $que_id ( sort { $a <=> $b } @que_id ) {
