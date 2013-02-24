@@ -9,7 +9,7 @@ from termcolor import colored
 import re
 
 file = '../data/questions.json'
-if sys.argv[1]:
+if len(sys.argv) > 1:
 	file = sys.argv[1]
 
 def signal_handler(signal, frame):
@@ -91,7 +91,7 @@ else:
 		try:
 			matches = [text for text in qQue if re.search(pattern, text, re.I)]
 		except:
-			print('Your regular expresion failed', detail)
+			print('Your regular expresion failed')
 			continue
 		que_id_l = [ qQue[text] for text in matches]
 		word_times = 'time'
