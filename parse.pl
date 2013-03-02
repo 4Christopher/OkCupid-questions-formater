@@ -10,6 +10,8 @@ use Term::ANSIColor;
 use Term::ReadLine;
 ## cpan JSON::DWIW Term::ANSIColor Term::ReadLine
 
+my $show_allowed_answer = 1;
+my $show_importance = 1;
 my $file = '../data/questions.json';
 $file = shift if @ARGV;
 unless (-r $file) {
@@ -62,14 +64,9 @@ sub printIt {
         my $imp = $que->{data}->{$que_id}->{importance};
         my $exp = $que->{data}->{$que_id}->{explanation};
         my $pub = $que->{data}->{$que_id}->{isPublic};
-        my $visability;
-        if ($pub) {
-            $visability = "publicly";
-        }
-        else {
-            $visability = "privately";
-        }
-        say "$text ($imp: $importance[$imp], $visability answered):";
+        my $visability = $pub ? 'publicly' : 'privately';
+        my $imp_text = $show_importance ? "$imp: $importance[$imp], " : '';
+        say "$text ($imp_text$visability answered):";
         for my $ans_id ( sort { $a <=> $b } keys $que->{data}->{$que_id}->{answers} ) {
             my $ans_text  = $que->{data}->{$que_id}->{answers}->{$ans_id}->{text};
             my $my_ans    = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMine};
@@ -77,7 +74,7 @@ sub printIt {
             if ($my_ans) {
                 print color 'underline';
             }
-            if ($match_ans) {
+            if ($match_ans and $show_allowed_answer) {
                 print color 'green';
             }
             print "\t$ans_text" . color 'reset';

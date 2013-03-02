@@ -8,6 +8,8 @@ import codecs
 from termcolor import colored
 import re
 
+show_allowed_answer = 1
+show_importance = 1
 file = '../data/questions.json'
 if len(sys.argv) > 1:
 	file = sys.argv[1]
@@ -49,10 +51,10 @@ def printIt(que_id, pattern):
 		imp = que['data'][que_id]['importance']
 		exp = que['data'][que_id]['explanation']
 		pub = que['data'][que_id]['isPublic']
-		if pub: visability = "publicly"
-		else:	visability = "privately"
+		visability = 'publicly' if pub else 'privately'
+		imp_text = '%d: %s, ' % (imp, importance[imp]) if show_importance else ''
 
-		print("%s (%d: %s, %s answered):" % (text, imp, importance[imp], visability))
+		print("%s (%s%s answered):" % (text, imp_text, visability))
 		for ans_id in sorted(que['data'][que_id]['answers']):
 			ans_text = que['data'][que_id]['answers'][ans_id]['text']
 			my_ans = que['data'][que_id]['answers'][ans_id]['isMine']
@@ -60,7 +62,7 @@ def printIt(que_id, pattern):
 			color_attrs = []
 			if my_ans:
 				color_attrs.append('underline')
-			if match_ans:
+			if match_ans and show_allowed_answer:
 				sys.stdout.write(colored('\t%s' % (ans_text), 'green', attrs=color_attrs))
 			else:
 				sys.stdout.write(colored('\t%s' % (ans_text), attrs=color_attrs))
