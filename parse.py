@@ -15,7 +15,7 @@ if len(sys.argv) > 1:
 	file = sys.argv[1]
 
 def signal_handler(signal, frame):
-    print('\nExiting. Have a nice day …')
+    print('\n\nExiting. Have a nice day …')
     sys.exit(0)
 signal.signal(signal.SIGINT, signal_handler)
 
@@ -60,14 +60,12 @@ def printIt(que_id, pattern):
 			my_ans = que['data'][que_id]['answers'][ans_id]['isMine']
 			match_ans = que['data'][que_id]['answers'][ans_id]['isMatch']
 			color_attrs = []
-			if my_ans:
-				color_attrs.append('underline')
+			if my_ans: color_attrs.append('underline')
 			if match_ans and show_allowed_answer:
 				sys.stdout.write(colored('\t%s' % (ans_text), 'green', attrs=color_attrs))
 			else:
 				sys.stdout.write(colored('\t%s' % (ans_text), attrs=color_attrs))
-			if my_ans and exp:
-				sys.stdout.write(" (%s)" % (exp))
+			if my_ans and exp: sys.stdout.write(" (%s)" % (exp))
 			print('')
 	print('')
 

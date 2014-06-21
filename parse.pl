@@ -71,16 +71,12 @@ sub printIt {
             my $ans_text  = $que->{data}->{$que_id}->{answers}->{$ans_id}->{text};
             my $my_ans    = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMine};
             my $match_ans = $que->{data}->{$que_id}->{answers}->{$ans_id}->{isMatch};
-            if ($my_ans) {
-                print color 'underline';
-            }
+            print color 'underline' if $my_ans;
             if ($match_ans and $show_allowed_answer) {
                 print color 'green';
             }
             print "\t$ans_text" . color 'reset';
-            if ( $my_ans and $exp ) {
-                print " ($exp)";
-            }
+            print " ($exp)" if ( $my_ans and $exp );
             print "\n";
         }
     } ## end else [ if ( $que->{data}->{$que_id...})]
