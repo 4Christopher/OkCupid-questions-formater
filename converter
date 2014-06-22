@@ -1,0 +1,57 @@
+#!/usr/bin/env python3
+# encoding: utf-8
+"""
+Convert JSON file from
+https://github.com/4Christopher/OKCupid-questions-downloader to a pretty and
+diffable form.
+"""
+
+import codecs
+import json
+import os
+import logging
+
+class ConvertOKCupidQuestions: # {{{
+    def __init__(self, json_file_path):
+        self._dir_path_for_questions = 'questions'
+        os.makedirs(self._dir_path_for_questions, exist_ok=True)
+
+        logging.basicConfig(
+            format='%(levelname)s: %(message)s',
+            level=logging.DEBUG,
+            # level=logging.INFO,
+            )
+
+        try:
+            json_fh = codecs.open(json_file_path, 'r', 'utf-8')
+            questions = json.load(json_fh)
+            json_fh.close()
+        except IOError as detail:
+            raise SystemExit(
+                'File %s is not readable: %s\n%s',
+                file,
+                detail[1]
+                )
+
+        logging.info(
+            'Parsing JSON encoded OKCupid questions'
+            + '(version: %d, time of generation: %s',
+            questions['version'], questions['date']
+            )
+
+    def _handle_questions(self, questions):
+        for question_id in questions['data']:
+            write_question(question_id, questions['data'][question_id])
+
+    def _write_question(self, question_id, data):
+        file_fh = open(os.path.sep.join(self._dir_path_for_questions), 'w')
+        print(
+            json.dump(
+                data,
+                file_fh,
+                sort_keys=True,
+                indent=4,
+                )
+            )
+
+converter = ConvertOKCupidQuestions('testing')

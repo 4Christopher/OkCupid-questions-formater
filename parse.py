@@ -29,9 +29,12 @@ importance = [ 'Irrelevant',
 # json_data=open('test.json')
 try:	json_data = codecs.open(file, 'r', 'utf-8')
 except IOError as detail:
-	print('File '+ file +' is not readable: '+ detail[1])
-	print('Please give me a JSON file as parameter …')
-	sys.exit(1)
+	raise SystemExit(
+		'File %s is not readable: %s\n%s',
+		file,
+		detail[1],
+		'Please give me a JSON file as parameter …'
+		)
 que = json.load(json_data)
 json_data.close()
 date = que['date']
