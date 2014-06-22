@@ -15,7 +15,7 @@ change in the script(s).
 
 ![Screen shot from the terminal](https://raw.github.com/4Christopher/OKCupid-questions-formater/master/screenshot.png)
 
-[OKCupid questions downloader]: http://userscripts.org/scripts/show/62703
+[OKCupid questions downloader]: https://github.com/4Christopher/OKCupid-questions-downloader
 
 # License
 [GPL](http://www.gnu.org/licenses/gpl.html) version 3 or later
