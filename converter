@@ -6,22 +6,19 @@ https://github.com/4Christopher/OKCupid-questions-downloader to a pretty and
 diffable form.
 """
 
+# modules {{{
 import codecs
 import json
 import os
 import logging
+# }}}
 
 class ConvertOKCupidQuestions: # {{{
-    def __init__(self, json_file_path):
-        self._dir_path_for_questions = 'questions'
+    def __init__(self, dir_path_for_questions = 'questions'):
+        self._dir_path_for_questions = dir_path_for_questions
         os.makedirs(self._dir_path_for_questions, exist_ok=True)
 
-        logging.basicConfig(
-            format='%(levelname)s: %(message)s',
-            level=logging.DEBUG,
-            # level=logging.INFO,
-            )
-
+    def parse(self, json_file_path):
         try:
             json_fh = codecs.open(json_file_path, 'r', 'utf-8')
             questions = json.load(json_fh)
@@ -35,23 +32,55 @@ class ConvertOKCupidQuestions: # {{{
 
         logging.info(
             'Parsing JSON encoded OKCupid questions'
-            + '(version: %d, time of generation: %s',
+            + ' (version: %d, time of generation: %s',
             questions['version'], questions['date']
             )
 
-    def _handle_questions(self, questions):
-        for question_id in questions['data']:
-            write_question(question_id, questions['data'][question_id])
-
-    def _write_question(self, question_id, data):
-        file_fh = open(os.path.sep.join(self._dir_path_for_questions), 'w')
-        print(
-            json.dump(
-                data,
-                file_fh,
-                sort_keys=True,
-                indent=4,
-                )
+        self._handle_questions(questions['data'])
+        logging.info(
+            'Wrote all %d questions into directory "%s"',
+            len(questions['data']),
+            self._dir_path_for_questions
             )
 
-converter = ConvertOKCupidQuestions('testing')
+    def _handle_questions(self, questions):
+        for question_id in questions:
+            self._write_question(question_id, questions[question_id])
+
+    def _write_question(self, question_id, data):
+        file_fh = open(
+            os.path.join(self._dir_path_for_questions, '%s.json' % question_id),
+            'w'
+            )
+        json.dump(
+            data,
+            file_fh,
+            sort_keys=True,
+            indent=4,
+            )
+        file_fh.write('\n')
+        file_fh.close()
+# }}}
+
+# main {{{
+def main():
+    """Run as command line program."""
+
+    import sys
+
+    logging.basicConfig(
+        format='%(levelname)s: %(message)s',
+        level=logging.INFO,
+        )
+
+    if len(sys.argv) > 1:
+        json_file = sys.argv[1]
+    else:
+        raise SystemExit('Please specify the JSON file as first parameter.')
+
+    converter = ConvertOKCupidQuestions()
+    converter.parse('testing')
+
+if __name__ == '__main__':
+    main()
+# }}}
