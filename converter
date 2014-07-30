@@ -23,25 +23,26 @@ class ConvertOKCupidQuestions: # {{{
             json_fh = codecs.open(json_file_path, 'r', 'utf-8')
             questions = json.load(json_fh)
             json_fh.close()
-        except IOError as detail:
+        except IOError as error:
             raise SystemExit(
-                'File %s is not readable: %s\n%s',
-                file,
-                detail[1]
+                'File {} is not readable: {}'.format(
+                    json_file_path,
+                    error
                 )
+            )
 
         logging.info(
             'Parsing JSON encoded OKCupid questions'
             + ' (version: %d, time of generation: %s',
             questions['version'], questions['date']
-            )
+        )
 
         self._handle_questions(questions['data'])
         logging.info(
             'Wrote all %d questions into directory "%s"',
             len(questions['data']),
             self._dir_path_for_questions
-            )
+        )
 
     def _handle_questions(self, questions):
         for question_id in questions:
@@ -51,13 +52,13 @@ class ConvertOKCupidQuestions: # {{{
         file_fh = open(
             os.path.join(self._dir_path_for_questions, '%s.json' % question_id),
             'w'
-            )
+        )
         json.dump(
             data,
             file_fh,
             sort_keys=True,
             indent=4,
-            )
+        )
         file_fh.write('\n')
         file_fh.close()
 # }}}
@@ -71,15 +72,15 @@ def main():
     logging.basicConfig(
         format='%(levelname)s: %(message)s',
         level=logging.INFO,
-        )
+    )
 
     if len(sys.argv) > 1:
-        json_file = sys.argv[1]
+        json_file_path = sys.argv[1]
     else:
         raise SystemExit('Please specify the JSON file as first parameter.')
 
     converter = ConvertOKCupidQuestions()
-    converter.parse('testing')
+    converter.parse(json_file_path)
 
 if __name__ == '__main__':
     main()
