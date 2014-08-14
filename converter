@@ -46,6 +46,7 @@ class ConvertOKCupidQuestions: # {{{
 
     def _handle_questions(self, questions):
         for question_id in questions:
+            del questions[question_id]['lowNumber']
             self._write_question(question_id, questions[question_id])
 
     def _write_question(self, question_id, data):
